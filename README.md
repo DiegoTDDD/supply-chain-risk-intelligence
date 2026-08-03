@@ -1,5 +1,7 @@
 # Global Supply Chain Risk & Delay Intelligence
 
+**🔗 Live dashboard: [diego-supply-chain-risk.streamlit.app](https://diego-supply-chain-risk.streamlit.app)**
+
 An end-to-end data science project analyzing delivery delay in a global supply chain,
 moving from statistical **understanding** to operational **decision**.
 
@@ -92,6 +94,9 @@ Module 4 and the cost effects from Module 1).
 
 ## Running the dashboard
 
+Live version: [diego-supply-chain-risk.streamlit.app](https://diego-supply-chain-risk.streamlit.app)
+
+To run locally instead:
 ```bash
 streamlit run app/streamlit_app.py
 ```
