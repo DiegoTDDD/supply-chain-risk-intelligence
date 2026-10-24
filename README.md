@@ -61,6 +61,7 @@ supply-chain-risk-intelligence/
 │   └── pages/                 # One page per module
 ├── reports/
 │   └── figures/                # Exported charts for the README / portfolio
+├── .github/                # CI: security audit, app health
 ├── requirements.txt
 └── README.md
 ```
@@ -84,7 +85,9 @@ supply-chain-risk-intelligence/
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate          # macOS / Linux
+# source .venv/Scripts/activate    # Windows (Git Bash)
+# .venv\Scripts\Activate.ps1       # Windows (PowerShell)
 pip install -r requirements.txt
 ```
 
