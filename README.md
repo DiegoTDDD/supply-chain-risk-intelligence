@@ -118,5 +118,5 @@ restated inside each notebook's conclusion section.
 
 ## Author
 
-Diego Leonardo Alves de Andrade — Data Analyst / Data Scientist
+Diego Leonardo Alves de Andrade  
 GitHub: [DiegoTDDD](https://github.com/DiegoTDDD)
