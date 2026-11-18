@@ -10,6 +10,7 @@ Download the CSV manually (Kaggle requires authentication) and place it at:
 """
 
 from pathlib import Path
+
 import pandas as pd
 
 RAW_PATH = Path(__file__).resolve().parents[1] / "data" / "raw" / "DataCoSupplyChainDataset.csv"

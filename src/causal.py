@@ -26,7 +26,7 @@ def nearest_neighbor_match(df: pd.DataFrame, treatment_col: str, ps_col: str = "
     matched_idx = []
     used = set()
 
-    for idx, ps in zip(treated.index, treated[ps_col]):
+    for idx, ps in zip(treated.index, treated[ps_col], strict=True):
         diffs = np.abs(control_ps - ps)
         order = np.argsort(diffs)
         for pos in order:

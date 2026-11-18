@@ -1,13 +1,14 @@
 """
 Module 5 support functions — network and allocation optimization.
 """
+from __future__ import annotations
+
 import numpy as np
-import pandas as pd
 import pulp
 
 
 def solve_allocation(orders: list, modes: list, cost_matrix: dict,
-                      capacity: dict = None) -> dict:
+                      capacity: dict | None = None) -> dict:
     """
     Solve a minimum-cost assignment of orders to shipping modes.
 
@@ -29,9 +30,11 @@ def solve_allocation(orders: list, modes: list, cost_matrix: dict,
 
     prob.solve(pulp.PULP_CBC_CMD(msg=False))
 
-    assignment = {o: m for o in orders for m in modes if pulp.value(x[o][m]) == 1}
+    # The solver returns floats; 0.9999999 is a 1.
+    assignment = {o: m for o in orders for m in modes if pulp.value(x[o][m]) > 0.5}
     total_cost = pulp.value(prob.objective)
-    return {"assignment": assignment, "total_cost": total_cost, "status": pulp.LpStatus[prob.status]}
+    status = pulp.LpStatus[prob.status]
+    return {"assignment": assignment, "total_cost": total_cost, "status": status}
 
 
 def monte_carlo_cost_distribution(base_cost: float, delay_prob: np.ndarray, penalty: float,

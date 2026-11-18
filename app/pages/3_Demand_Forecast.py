@@ -1,6 +1,7 @@
-import streamlit as st
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+import streamlit as st
 
 FIG_DIR = Path(__file__).resolve().parents[2] / "reports" / "figures"
 

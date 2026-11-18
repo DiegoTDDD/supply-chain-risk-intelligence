@@ -2,8 +2,7 @@
 Module 4 support functions — delay risk classification & explainability.
 """
 import numpy as np
-import pandas as pd
-from sklearn.metrics import roc_auc_score, average_precision_score, brier_score_loss
+from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
 
 
 def precision_at_k(y_true: np.ndarray, y_scores: np.ndarray, k: int) -> float:
@@ -13,6 +12,7 @@ def precision_at_k(y_true: np.ndarray, y_scores: np.ndarray, k: int) -> float:
 
 
 def evaluate_classifier(y_true: np.ndarray, y_scores: np.ndarray, k_fraction: float = 0.1) -> dict:
+    """Ranking, calibration and top-k precision of risk scores."""
     k = max(1, int(len(y_true) * k_fraction))
     return {
         "auc_roc": roc_auc_score(y_true, y_scores),
@@ -22,7 +22,8 @@ def evaluate_classifier(y_true: np.ndarray, y_scores: np.ndarray, k_fraction: fl
     }
 
 
-def expected_savings(y_true: np.ndarray, y_scores: np.ndarray, k: int, penalty_per_delay: float) -> float:
+def expected_savings(y_true: np.ndarray, y_scores: np.ndarray, k: int,
+                     penalty_per_delay: float) -> float:
     """Estimated savings from intervening on the top-k highest-risk orders,
     assuming intervention prevents the delay with certainty (upper bound estimate)."""
     order = np.argsort(y_scores)[::-1][:k]

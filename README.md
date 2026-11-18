@@ -1,9 +1,24 @@
 # Global Supply Chain Risk & Delay Intelligence
 
-**🔗 Live dashboard: [diego-supply-chain-risk.streamlit.app](https://diego-supply-chain-risk.streamlit.app)**
+[![Tests](https://github.com/DiegoTDDD/supply-chain-risk-intelligence/actions/workflows/tests.yml/badge.svg)](https://github.com/DiegoTDDD/supply-chain-risk-intelligence/actions/workflows/tests.yml)
+[![Notebooks](https://github.com/DiegoTDDD/supply-chain-risk-intelligence/actions/workflows/notebooks.yml/badge.svg)](https://github.com/DiegoTDDD/supply-chain-risk-intelligence/actions/workflows/notebooks.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-An end-to-end data science project analyzing delivery delay in a global supply chain,
-moving from statistical **understanding** to operational **decision**.
+**Problem.** Late deliveries cost money, but "we are often late" is not something operations can act on. They need to know what causes the delay, when it happens, what volume is coming, which orders are at risk, and what to change.
+
+**Solution.** Five connected analyses of 180,519 real orders (the DataCo dataset): causal inference, survival analysis, forecasting, risk scoring with explanations, and an optimization that turns the risk scores into a cheaper shipping allocation.
+
+**🔗 Live dashboard: [diego-supply-chain-risk.streamlit.app](https://diego-supply-chain-risk.streamlit.app)** · **Design decisions: [`docs/adr/`](docs/adr/README.md)**
+
+## Results
+
+| Module | Business result | How it was measured |
+|---|---|---|
+| 1. Causal diagnosis | Second Class runs **1.99 days later** against its promise than Standard Class (95% CI 1.97 to 2.01) | Propensity score matching, 35,216 matched pairs, \|SMD\| < 0.1 |
+| 2. Survival analysis | Shipping mode is the main driver of time to ship; the effect is stable across both halves of the data | Kaplan-Meier, log-rank, Cox PH (C-index 0.69) |
+| 3. Demand forecasting | **33% lower error** than the naive baseline: MAPE 5.9% vs 8.9% | Prophet vs SARIMA vs lag-7 naive, 30-day holdout, 93% interval coverage |
+| 4. Delay risk | **94.8% of the top 10% riskiest orders are late**; AUC 0.73 | Calibrated XGBoost, chronological split, leakage-audited features, SHAP |
+| 5. Optimization | **1.01% lower expected cost** than the historical allocation, under the same capacity | Binary LP (PuLP) + 10,000-run Monte Carlo + ±20% penalty sensitivity |
 
 ## Business narrative
 
@@ -61,8 +76,14 @@ supply-chain-risk-intelligence/
 │   └── pages/                 # One page per module
 ├── reports/
 │   └── figures/                # Exported charts for the README / portfolio
-├── .github/                # CI: security audit, app health
-├── requirements.txt
+├── tests/
+│   ├── test_modules.py         # unit tests for every function in src/
+│   └── make_sample_dataco.py   # synthetic DataCo-shaped file for running the notebooks in CI
+├── docs/adr/                   # architecture decision records
+├── .github/                # CI: tests, notebooks, Windows, security audit, app health
+├── pyproject.toml          # project metadata, pytest and ruff settings
+├── requirements.txt        # pinned versions for the notebooks and the dashboard
+├── requirements-test.txt   # light set for the unit tests
 └── README.md
 ```
 
@@ -104,15 +125,30 @@ To run locally instead:
 streamlit run app/streamlit_app.py
 ```
 
+## Tests
+
+```bash
+pip install -r requirements-test.txt
+pytest
+```
+
+17 tests cover every function in `src/` on data with known answers. For example, matching must recover a planted +2-day effect that the naive comparison overstates, the LP must respect capacity, and the Monte Carlo mean must equal its expectation.
+
 ## Limitations
 
 This is an observational, single-period dataset. Causal estimates are quasi-causal (matching
 reduces but does not eliminate confounding bias), and long-horizon seasonality in the
 forecasting module cannot be fully validated with the available time range. These limits are
-restated inside each notebook's conclusion section.
+restated inside each notebook's conclusion section. In addition:
+
+- Covariate balance after matching is checked numerically only for order value. Categorical covariates are a follow-up.
+- Freight costs and the SLA penalty in Module 5 are stated assumptions, so the 1.01% saving shows the method, not a quote.
+- Forecasts cover only the period before the 2017-10-02 volume break ([ADR 0004](docs/adr/0004-forecast-only-the-pre-break-regime.md)).
 
 ## Automated checks
 
+- **Tests** (`tests.yml`) run `ruff` (type hints required in `src/`) and the 17 unit tests on every push and pull request.
+- **Notebooks** (`notebooks.yml`) runs all five notebooks top to bottom with the pinned requirements, on a synthetic file with the DataCo schema, because the real dataset needs a Kaggle login ([ADR 0006](docs/adr/0006-notebooks-run-in-ci-on-synthetic-data.md)). It runs when the notebooks, `src/` or the requirements change, and monthly.
 - **Security audit** (`security-audit.yml`) audits every `requirements*.txt` with `pip-audit` whenever dependencies change and every Monday. It fails only when a vulnerable package has a fixed version available.
 - **App health** (`app-health.yml`) opens the [live app](https://diego-supply-chain-risk.streamlit.app) in a real browser after each push and once a day (waking it if it was asleep) and fails if the app shows an error.
 

@@ -3,7 +3,7 @@ Module 3 support functions — demand forecasting.
 """
 import numpy as np
 import pandas as pd
-from statsmodels.tsa.seasonal import STL
+from statsmodels.tsa.seasonal import STL, DecomposeResult
 
 
 def naive_forecast(series: pd.Series, lag: int = 7) -> pd.Series:
@@ -12,15 +12,18 @@ def naive_forecast(series: pd.Series, lag: int = 7) -> pd.Series:
 
 
 def mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Mean absolute percentage error in %, skipping days where the true value is 0."""
+    y_true, y_pred = np.asarray(y_true, dtype=float), np.asarray(y_pred, dtype=float)
     mask = y_true != 0
     return float(np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100)
 
 
 def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    y_true, y_pred = np.asarray(y_true, dtype=float), np.asarray(y_pred, dtype=float)
     return float(np.sqrt(np.mean((y_true - y_pred) ** 2)))
 
 
-def stl_decompose(series: pd.Series, period: int = 7):
+def stl_decompose(series: pd.Series, period: int = 7) -> DecomposeResult:
     """Run STL decomposition and return the fitted result object."""
     return STL(series, period=period).fit()
 

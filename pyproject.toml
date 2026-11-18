@@ -1,0 +1,27 @@
+[project]
+name = "supply-chain-risk-intelligence"
+version = "1.1.0"
+description = "Causal, survival, forecasting, risk and optimization analysis of delivery delay (DataCo)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Diego Alves" }]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".github", "notebooks"]
+
+[tool.ruff.lint]
+# ANN: type hints on every function in src/. T20: no print() there.
+select = ["E", "F", "I", "B", "UP", "ANN", "T20"]
+ignore = ["E402", "ANN401"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["ANN", "T20"]
+"app/**" = ["ANN", "T20", "E501"]
